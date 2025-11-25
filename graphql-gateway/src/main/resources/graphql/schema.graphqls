@@ -1,0 +1,14 @@
+type Drone {
+  id: Int
+  cooling: Boolean
+  heating: Boolean
+  capacity: Float
+  maxMoves: Int
+  costPerMove: Float
+  costInitial: Float
+  costFinal: Float
+}
+
+type Query {
+  dronesWithCooling(state: Boolean!): [Drone!]!
+}
