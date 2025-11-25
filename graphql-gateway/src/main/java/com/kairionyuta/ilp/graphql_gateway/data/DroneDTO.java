@@ -1,6 +1,7 @@
 package com.kairionyuta.ilp.graphql_gateway.data;
 
 public class DroneDTO {
+    private String name;
     private Integer id;
     private Boolean cooling;
     private Boolean heating;
@@ -9,6 +10,14 @@ public class DroneDTO {
     private Double costPerMove;
     private Double costInitial;
     private Double costFinal;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Integer getId() {
         return id;

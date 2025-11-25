@@ -32,7 +32,9 @@ public class DroneQueryResolver {
             DroneDetailsDTO drone = ilpRestClient.droneDetails(id);
             CapabilityDTO capability = drone.capability;
 
+            // Copies capability from droneDetailsDTO to droneDTO
             DroneDTO out = new DroneDTO();
+            out.setName(drone.name);
             out.setId(drone.id);
             out.setCooling(capability.cooling);
             out.setHeating(capability.heating);
@@ -47,5 +49,26 @@ public class DroneQueryResolver {
 
         // Step 3: returned list is shaped by your schema
         return drones;
+    }
+
+    @QueryMapping
+    public DroneDTO droneDetails(@Argument int id) {
+        DroneDetailsDTO droneDetails = ilpRestClient.droneDetails(id);
+        if (droneDetails == null || droneDetails.capability == null) return null;
+
+        CapabilityDTO capability = droneDetails.capability;
+
+        DroneDTO out = new DroneDTO();
+        out.setName(droneDetails.name);
+        out.setId(droneDetails.id);
+        out.setCooling(capability.cooling);
+        out.setHeating(capability.heating);
+        out.setCapacity(capability.capacity.doubleValue());
+        out.setMaxMoves(capability.maxMoves);
+        out.setCostPerMove(capability.costPerMove.doubleValue());
+        out.setCostInitial(capability.costInitial.doubleValue());
+        out.setCostFinal(capability.costFinal.doubleValue());
+
+        return out;
     }
 }

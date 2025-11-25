@@ -1,4 +1,5 @@
 type Drone {
+  name: String
   id: Int
   cooling: Boolean
   heating: Boolean
@@ -11,4 +12,5 @@ type Drone {
 
 type Query {
   dronesWithCooling(state: Boolean!): [Drone!]!
+  droneDetails(id: Int!): Drone
 }
