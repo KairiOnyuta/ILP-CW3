@@ -36,9 +36,34 @@ input MedDispatchInput {
   delivery: DeliveryInput!
 }
 
+type LngLat {
+  lng: Float!
+  lat: Float!
+}
+
+type Delivery {
+  deliveryId: Int
+  flightPath: [LngLat!]!
+}
+
+type DronePath {
+  droneId: Int!
+  deliveries: [Delivery!]!
+}
+
+type DeliveryPathResult {
+  totalCost: Float!
+  totalMoves: Int!
+  dronePaths: [DronePath!]!
+}
+
 type Query {
   dronesWithCooling(state: Boolean!): [Drone!]!
   droneDetails(id: Int!): Drone
   queryDrones(filters: [QueryFilterInput!]!): [Drone!]!
   availableDrones(dispatches: [MedDispatchInput!]!): [Drone!]!
+}
+
+type Mutation {
+  calculateDeliveryPath(dispatches: [MedDispatchInput!]!): DeliveryPathResult!
 }

@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import com.kairionyuta.ilp.graphql_gateway.data.DroneDetailsDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.QueryFilterInputDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.MedDispatchInputDTO;
+import com.kairionyuta.ilp.graphql_gateway.data.DeliveryPathResultDTO;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,5 +61,22 @@ public class IlpRestClient {
         Integer[] ids = restTemplate.postForObject(url, request, Integer[].class);
         System.out.println("Received available drone ids: " + Arrays.toString(ids));
         return Arrays.asList(ids);
+    }
+
+
+    public DeliveryPathResultDTO calculateDeliveryPath(List<MedDispatchInputDTO> dispatches) {
+        String url = baseUrl + "/calcDeliveryPath";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<List<MedDispatchInputDTO>> request =
+                new HttpEntity<>(dispatches, headers);
+
+        DeliveryPathResultDTO result =
+                restTemplate.postForObject(url, request, DeliveryPathResultDTO.class);
+
+        System.out.println("Received calcDeliveryPath result: " + result);
+        return result;
     }
 }

@@ -3,10 +3,12 @@ package com.kairionyuta.ilp.graphql_gateway.graphql;
 import com.kairionyuta.ilp.graphql_gateway.client.IlpRestClient;
 import com.kairionyuta.ilp.graphql_gateway.data.DroneDTO;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import com.kairionyuta.ilp.graphql_gateway.data.DroneDetailsDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.CapabilityDTO;
+import com.kairionyuta.ilp.graphql_gateway.data.DeliveryPathResultDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.QueryFilterInputDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.MedDispatchInputDTO;
 
@@ -135,6 +137,14 @@ public class DroneQueryResolver {
         }
 
         return drones;
+    }
+
+    @MutationMapping
+    public DeliveryPathResultDTO calculateDeliveryPath(
+            @Argument(name = "dispatches") List<MedDispatchInputDTO> dispatches) {
+
+        System.out.println("GraphQL calculateDeliveryPath called with " + dispatches.size() + " dispatches");
+        return ilpRestClient.calculateDeliveryPath(dispatches);
     }
 
 

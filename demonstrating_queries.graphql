@@ -1,0 +1,82 @@
+# CW3 demo queries
+
+query CoolingTrue {
+  dronesWithCooling(state: true) {
+    id
+    cooling
+    heating
+    capacity
+    maxMoves
+    costPerMove
+    costInitial
+    costFinal
+  }
+}
+
+query drone4Details{
+  droneDetails(id: 6) {
+    id
+    capacity
+    cooling
+  }
+}
+
+query capacityBelow8WithCooling{
+  queryDrones(filters: [
+    { attribute: "capacity", operator: "<", value: "8" },
+    { attribute: "cooling", operator: "=", value: "true" }
+  ]) {
+    id
+    capacity
+    cooling
+  }
+}
+
+query {
+  availableDrones(dispatches: [
+    {
+      id: 1,
+      date: "2025-12-22",
+      time: "14:30",
+      requirements: {
+        capacity: 0.75,
+        cooling: false,
+        heating: true,
+        maxCost: 1000
+      },
+      delivery: {
+        lng: 55.93999624,
+        lat: -3.185665924
+      }
+    }
+  ]) {
+    id
+    capacity
+    cooling
+    heating
+  }
+}
+
+mutation {
+  calculateDeliveryPath(dispatches: [
+  {
+    id: 123,
+    date: "2025-12-22",
+    time: "14:30",
+    requirements: {capacity: 0.75, heating: true},
+    delivery: {lng: -3.188, lat: 55.945}
+  },
+  {
+    id: 124,
+    date: "2025-12-22",
+    time: "14:45",
+    requirements: {capacity: 1.0, heating: true},
+    delivery: {lng: -3.1872, lat: 55.9453}
+  }
+]) {
+    totalCost
+    totalMoves
+  }
+}
+
+
