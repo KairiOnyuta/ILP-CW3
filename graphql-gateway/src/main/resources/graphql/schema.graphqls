@@ -10,7 +10,14 @@ type Drone {
   costFinal: Float
 }
 
+input QueryFilterInput {
+  attribute: String!
+  operator: String!
+  value: String!
+}
+
 type Query {
   dronesWithCooling(state: Boolean!): [Drone!]!
   droneDetails(id: Int!): Drone
+  queryDrones(filters: [QueryFilterInput!]!): [Drone!]!
 }

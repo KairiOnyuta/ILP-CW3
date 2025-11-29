@@ -7,6 +7,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import com.kairionyuta.ilp.graphql_gateway.data.DroneDetailsDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.CapabilityDTO;
+import com.kairionyuta.ilp.graphql_gateway.data.QueryFilterInputDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,4 +72,39 @@ public class DroneQueryResolver {
 
         return out;
     }
+
+    @QueryMapping
+    public List<DroneDTO> queryDrones(@Argument(name = "filters") List<QueryFilterInputDTO> filters) {
+
+    // 1) Ask CW2 dynamic query for matching IDs
+    List<Integer> ids = ilpRestClient.queryDrones(filters);
+
+    // 2) Expand each id into a full DroneDTO (same as cooling slice)
+    List<DroneDTO> drones = new ArrayList<>();
+
+    for (Integer id : ids) {
+        DroneDetailsDTO droneDetails = ilpRestClient.droneDetails(id);
+
+        if (droneDetails == null || droneDetails.capability == null) continue;
+
+        CapabilityDTO capability = droneDetails.capability;
+
+        DroneDTO out = new DroneDTO();
+        out.setName(droneDetails.name);
+        out.setId(droneDetails.id);
+        out.setCooling(capability.cooling);
+        out.setHeating(capability.heating);
+        out.setCapacity(capability.capacity.doubleValue());
+        out.setMaxMoves(capability.maxMoves);
+        out.setCostPerMove(capability.costPerMove.doubleValue());
+        out.setCostInitial(capability.costInitial.doubleValue());
+        out.setCostFinal(capability.costFinal.doubleValue());
+
+        drones.add(out);
+    }
+
+    return drones;
+}
+
+
 }
