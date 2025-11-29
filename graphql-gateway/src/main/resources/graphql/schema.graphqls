@@ -16,8 +16,29 @@ input QueryFilterInput {
   value: String!
 }
 
+input RequirementsInput {
+  capacity: Float!
+  cooling: Boolean
+  heating: Boolean
+  maxCost: Int
+}
+
+input DeliveryInput {
+  lng: Float!
+  lat: Float!
+}
+
+input MedDispatchInput {
+  id: Int!
+  date: String
+  time: String
+  requirements: RequirementsInput!
+  delivery: DeliveryInput!
+}
+
 type Query {
   dronesWithCooling(state: Boolean!): [Drone!]!
   droneDetails(id: Int!): Drone
   queryDrones(filters: [QueryFilterInput!]!): [Drone!]!
+  availableDrones(dispatches: [MedDispatchInput!]!): [Drone!]!
 }

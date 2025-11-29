@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import com.kairionyuta.ilp.graphql_gateway.data.DroneDetailsDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.CapabilityDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.QueryFilterInputDTO;
+import com.kairionyuta.ilp.graphql_gateway.data.MedDispatchInputDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,35 +77,65 @@ public class DroneQueryResolver {
     @QueryMapping
     public List<DroneDTO> queryDrones(@Argument(name = "filters") List<QueryFilterInputDTO> filters) {
 
-    // 1) Ask CW2 dynamic query for matching IDs
-    List<Integer> ids = ilpRestClient.queryDrones(filters);
+        // 1) Ask CW2 dynamic query for matching IDs
+        List<Integer> ids = ilpRestClient.queryDrones(filters);
 
-    // 2) Expand each id into a full DroneDTO (same as cooling slice)
-    List<DroneDTO> drones = new ArrayList<>();
+        // 2) Expand each id into a full DroneDTO (same as cooling slice)
+        List<DroneDTO> drones = new ArrayList<>();
 
-    for (Integer id : ids) {
-        DroneDetailsDTO droneDetails = ilpRestClient.droneDetails(id);
+        for (Integer id : ids) {
+            DroneDetailsDTO droneDetails = ilpRestClient.droneDetails(id);
 
-        if (droneDetails == null || droneDetails.capability == null) continue;
+            if (droneDetails == null || droneDetails.capability == null) continue;
 
-        CapabilityDTO capability = droneDetails.capability;
+            CapabilityDTO capability = droneDetails.capability;
 
-        DroneDTO out = new DroneDTO();
-        out.setName(droneDetails.name);
-        out.setId(droneDetails.id);
-        out.setCooling(capability.cooling);
-        out.setHeating(capability.heating);
-        out.setCapacity(capability.capacity.doubleValue());
-        out.setMaxMoves(capability.maxMoves);
-        out.setCostPerMove(capability.costPerMove.doubleValue());
-        out.setCostInitial(capability.costInitial.doubleValue());
-        out.setCostFinal(capability.costFinal.doubleValue());
+            DroneDTO out = new DroneDTO();
+            out.setName(droneDetails.name);
+            out.setId(droneDetails.id);
+            out.setCooling(capability.cooling);
+            out.setHeating(capability.heating);
+            out.setCapacity(capability.capacity.doubleValue());
+            out.setMaxMoves(capability.maxMoves);
+            out.setCostPerMove(capability.costPerMove.doubleValue());
+            out.setCostInitial(capability.costInitial.doubleValue());
+            out.setCostFinal(capability.costFinal.doubleValue());
 
-        drones.add(out);
+            drones.add(out);
+        }
+
+        return drones;
     }
 
-    return drones;
-}
+    @QueryMapping
+    public List<DroneDTO> availableDrones(@Argument(name = "dispatches") List<MedDispatchInputDTO> dispatches) {
+        System.out.println("GraphQL availableDrones called with " + dispatches.size() + " dispatches");
+
+        List<Integer> ids = ilpRestClient.availableDrones(dispatches);
+        List<DroneDTO> drones = new ArrayList<>();
+
+        for (Integer id : ids) {
+            DroneDetailsDTO details = ilpRestClient.droneDetails(id);
+            if (details == null || details.capability == null) continue;
+
+            CapabilityDTO capability = details.capability;
+
+            DroneDTO out = new DroneDTO();
+            out.setName(details.name);
+            out.setId(details.id);
+            out.setCooling(capability.cooling);
+            out.setHeating(capability.heating);
+            out.setCapacity(capability.capacity.doubleValue());
+            out.setMaxMoves(capability.maxMoves);
+            out.setCostPerMove(capability.costPerMove.doubleValue());
+            out.setCostInitial(capability.costInitial.doubleValue());
+            out.setCostFinal(capability.costFinal.doubleValue());
+
+            drones.add(out);
+        }
+
+        return drones;
+    }
 
 
 }

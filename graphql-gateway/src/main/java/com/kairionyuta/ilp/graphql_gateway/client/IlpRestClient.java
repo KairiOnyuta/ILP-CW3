@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 
 import com.kairionyuta.ilp.graphql_gateway.data.DroneDetailsDTO;
 import com.kairionyuta.ilp.graphql_gateway.data.QueryFilterInputDTO;
+import com.kairionyuta.ilp.graphql_gateway.data.MedDispatchInputDTO;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,5 +45,19 @@ public class IlpRestClient {
 
         return Arrays.asList(ids);
 
+    }
+
+    public List<Integer> availableDrones(List<MedDispatchInputDTO> dispatches) {
+        String url = baseUrl + "/queryAvailableDrones";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<List<MedDispatchInputDTO>> request =
+                new HttpEntity<>(dispatches, headers);
+
+        Integer[] ids = restTemplate.postForObject(url, request, Integer[].class);
+        System.out.println("Received available drone ids: " + Arrays.toString(ids));
+        return Arrays.asList(ids);
     }
 }
