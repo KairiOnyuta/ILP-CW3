@@ -27,83 +27,43 @@ public class DroneQueryResolver {
     @QueryMapping
     public List<DroneDTO> dronesWithCooling(@Argument boolean state) {
 
-        // Step 1: get IDs from CW2
+        //get list of IDs from REST Service
         List<Integer> ids = ilpRestClient.dronesWithCooling(state);
 
-        // Step 2: expand each ID into a full DroneDTO
+        // expand each ID into a full DroneDTO
         List<DroneDTO> drones = new ArrayList<>();
+
         for (Integer id : ids) {
-            DroneDetailsDTO drone = ilpRestClient.droneDetails(id);
-            CapabilityDTO capability = drone.capability;
-
             // Copies capability from droneDetailsDTO to droneDTO
-            DroneDTO out = new DroneDTO();
-            out.setName(drone.name);
-            out.setId(drone.id);
-            out.setCooling(capability.cooling);
-            out.setHeating(capability.heating);
-            out.setCapacity(capability.capacity.doubleValue());
-            out.setMaxMoves(capability.maxMoves);
-            out.setCostPerMove(capability.costPerMove.doubleValue());
-            out.setCostInitial(capability.costInitial.doubleValue());
-            out.setCostFinal(capability.costFinal.doubleValue());
-
-            drones.add(out);
+            DroneDTO out = toDroneDTO(ilpRestClient.droneDetails(id));
+            if (out != null) {
+                drones.add(out);
+            }
         }
 
-        // Step 3: returned list is shaped by your schema
         return drones;
     }
 
     @QueryMapping
     public DroneDTO droneDetails(@Argument int id) {
-        DroneDetailsDTO droneDetails = ilpRestClient.droneDetails(id);
-        if (droneDetails == null || droneDetails.capability == null) return null;
-
-        CapabilityDTO capability = droneDetails.capability;
-
-        DroneDTO out = new DroneDTO();
-        out.setName(droneDetails.name);
-        out.setId(droneDetails.id);
-        out.setCooling(capability.cooling);
-        out.setHeating(capability.heating);
-        out.setCapacity(capability.capacity.doubleValue());
-        out.setMaxMoves(capability.maxMoves);
-        out.setCostPerMove(capability.costPerMove.doubleValue());
-        out.setCostInitial(capability.costInitial.doubleValue());
-        out.setCostFinal(capability.costFinal.doubleValue());
-
-        return out;
+        // Calls REST service with given id and converts response to DroneDTO
+        return toDroneDTO(ilpRestClient.droneDetails(id));
     }
 
     @QueryMapping
     public List<DroneDTO> queryDrones(@Argument(name = "filters") List<QueryFilterInputDTO> filters) {
 
-        // 1) Ask CW2 dynamic query for matching IDs
+        // Gets list of IDs that match query from REST service
         List<Integer> ids = ilpRestClient.queryDrones(filters);
 
-        // 2) Expand each id into a full DroneDTO (same as cooling slice)
+        // Expand each id into a full DroneDTO (same as cooling slice)
         List<DroneDTO> drones = new ArrayList<>();
 
         for (Integer id : ids) {
-            DroneDetailsDTO droneDetails = ilpRestClient.droneDetails(id);
-
-            if (droneDetails == null || droneDetails.capability == null) continue;
-
-            CapabilityDTO capability = droneDetails.capability;
-
-            DroneDTO out = new DroneDTO();
-            out.setName(droneDetails.name);
-            out.setId(droneDetails.id);
-            out.setCooling(capability.cooling);
-            out.setHeating(capability.heating);
-            out.setCapacity(capability.capacity.doubleValue());
-            out.setMaxMoves(capability.maxMoves);
-            out.setCostPerMove(capability.costPerMove.doubleValue());
-            out.setCostInitial(capability.costInitial.doubleValue());
-            out.setCostFinal(capability.costFinal.doubleValue());
-
-            drones.add(out);
+            DroneDTO out = toDroneDTO(ilpRestClient.droneDetails(id));
+            if (out != null) {
+                drones.add(out);
+            }
         }
 
         return drones;
@@ -111,29 +71,18 @@ public class DroneQueryResolver {
 
     @QueryMapping
     public List<DroneDTO> availableDrones(@Argument(name = "dispatches") List<MedDispatchInputDTO> dispatches) {
-        System.out.println("GraphQL availableDrones called with " + dispatches.size() + " dispatches");
 
+        // Get list of available drone IDs from REST service
         List<Integer> ids = ilpRestClient.availableDrones(dispatches);
+
+        // Expand each id into a full DroneDTO (same as cooling slice)
         List<DroneDTO> drones = new ArrayList<>();
 
         for (Integer id : ids) {
-            DroneDetailsDTO details = ilpRestClient.droneDetails(id);
-            if (details == null || details.capability == null) continue;
-
-            CapabilityDTO capability = details.capability;
-
-            DroneDTO out = new DroneDTO();
-            out.setName(details.name);
-            out.setId(details.id);
-            out.setCooling(capability.cooling);
-            out.setHeating(capability.heating);
-            out.setCapacity(capability.capacity.doubleValue());
-            out.setMaxMoves(capability.maxMoves);
-            out.setCostPerMove(capability.costPerMove.doubleValue());
-            out.setCostInitial(capability.costInitial.doubleValue());
-            out.setCostFinal(capability.costFinal.doubleValue());
-
-            drones.add(out);
+            DroneDTO out = toDroneDTO(ilpRestClient.droneDetails(id));
+            if (out != null) {
+                drones.add(out);
+            }
         }
 
         return drones;
@@ -142,9 +91,28 @@ public class DroneQueryResolver {
     @MutationMapping
     public DeliveryPathResultDTO calculateDeliveryPath(
             @Argument(name = "dispatches") List<MedDispatchInputDTO> dispatches) {
-
-        System.out.println("GraphQL calculateDeliveryPath called with " + dispatches.size() + " dispatches");
+        
+        // Calls REST service to calculate delivery path with given dispatches
         return ilpRestClient.calculateDeliveryPath(dispatches);
+    }
+
+    // Helper to convert DroneDetailsDTO to DroneDTO
+    private DroneDTO toDroneDTO(DroneDetailsDTO details) {
+        if (details == null || details.capability == null) return null;
+
+        CapabilityDTO capability = details.capability;
+
+        DroneDTO out = new DroneDTO();
+        out.setName(details.name);
+        out.setId(details.id);
+        out.setCooling(capability.cooling);
+        out.setHeating(capability.heating);
+        out.setCapacity(capability.capacity.doubleValue());
+        out.setMaxMoves(capability.maxMoves);
+        out.setCostPerMove(capability.costPerMove.doubleValue());
+        out.setCostInitial(capability.costInitial.doubleValue());
+        out.setCostFinal(capability.costFinal.doubleValue());
+        return out;
     }
 
 
